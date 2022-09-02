@@ -26,7 +26,6 @@ import (
 )
 
 func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
-
 	id := chi.URLParam(r, "artifactID")
 
 	artifact, err := svc.store.GetArtifactByID(id)
@@ -209,7 +208,7 @@ func (svc *service) signAndStreamIPA(artifact yolopb.Artifact, w io.Writer) erro
 		// write unsigned-file to tempdir
 		unsigned := filepath.Join(tempdir, "unsigned.ipa")
 		signed = filepath.Join(tempdir, "signed.ipa")
-		f, err := os.OpenFile(unsigned, os.O_RDWR|os.O_CREATE, 0755)
+		f, err := os.OpenFile(unsigned, os.O_RDWR|os.O_CREATE, 0o755)
 		if err != nil {
 			return err
 		}
