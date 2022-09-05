@@ -166,24 +166,6 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 		// FIXME: list last branches, commits etc for each repo
 	}
 
-	// configure repo configs
-	{
-		// FIXME: automatically configure repo configs based on .github/yolo.yml
-		/*
-			// fetch workflows
-			{
-				opts := &github.ListOptions{}
-				before := time.Now()
-				workflows, _, err := svc.ghc.Actions.ListWorkflows(ctx, repo.owner, repo.repo, opts)
-				if err != nil {
-					return nil, err
-				}
-				logger.Debug("github.Actions.ListWorkflows", zap.Int("total", len(workflows.Workflows)), zap.Duration("duration", time.Since(before)))
-				fmt.Println(u.PrettyJSON(workflows))
-			}
-		*/
-	}
-
 	return batch, nil
 }
 
