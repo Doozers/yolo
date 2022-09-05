@@ -34,7 +34,7 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-func (worker githubWorker) ParseConfig() (bool, error) {
+func (worker *githubWorker) ParseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
 		return false, nil
 	}
@@ -67,8 +67,9 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 	}
 
 	shouldRun, err := worker.ParseConfig()
+	fmt.Println("\n\n\n", worker.repoConfigs, "\n\n")
 	if err != nil {
-		svc.logger.Error("invalid config", zap.Error(err))
+		worker.logger.Error("invalid config", zap.Error(err))
 		return fmt.Errorf("%w", err)
 	}
 	if !shouldRun {
@@ -99,6 +100,7 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		svc.logger.Debug("github: refresh", zap.Int("iteration", iteration), zap.Time("since", since))
 
 		// fetch repo activity
+		worker.logger.Warn("github: fetch repo activity", zap.Any("repos", worker.repoConfigs))
 		for _, repo := range worker.repoConfigs {
 			// FIXME: support "since"
 			batch, err := worker.fetchRepoActivity(ctx, repo, iteration, since)
@@ -295,6 +297,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 			}
 			worker.logger.Debug("github.Actions.ListWorkflowRunArtifacts", zap.Int("total", len(ret.Artifacts)), zap.Duration("duration", time.Since(before)))
 			for _, artifact := range ret.Artifacts {
+				fmt.Println("------------------------------------------------\n", artifact, "------------------------------------------------\n")
 				batch.Merge(worker.batchFromWorkflowRunArtifact(run, artifact))
 			}
 		}
