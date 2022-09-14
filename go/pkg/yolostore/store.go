@@ -2,6 +2,7 @@ package yolostore
 
 import (
 	"fmt"
+	"sort"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"go.uber.org/zap"
@@ -239,6 +240,7 @@ type GetBuildListOpts struct {
 	MergeRequestState    []yolopb.MergeRequest_State
 	Branch               []string
 	Limit                int32
+	SortByCommitDate     bool
 }
 
 func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
@@ -368,6 +370,19 @@ func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 				artifact.DownloadsCount = count
 			}
 		}
+	}
+
+	// sort by commit date
+	if bl.SortByCommitDate {
+		sort.Slice(builds, func(i, j int) bool {
+			if builds[i].HasCommit.CreatedAt == nil {
+				return false
+			}
+			if builds[j].HasCommit.CreatedAt == nil {
+				return true
+			}
+			return builds[i].HasCommit.CreatedAt.After(*builds[j].HasCommit.CreatedAt)
+		})
 	}
 
 	return builds, nil
